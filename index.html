@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0d47a1" />
+  <title>suBTo Experience — Perfil do Atleta</title>
+  <style>
+    :root{--azul:#0d47a1;--azul2:#1565c0;--laranja:#f57c00;--bg:#f5f7fb;--card:#fff;--txt:#172033;--muted:#64748b;--line:#dbe3ee}
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt)}
+    .top{background:linear-gradient(135deg,var(--azul),var(--azul2));color:white;padding:26px 18px 32px}.wrap{max-width:820px;margin:auto}.brand{font-weight:800;font-size:28px}.brand b{color:#ffb04a}.top p{margin:8px 0 0;opacity:.92}.card{background:var(--card);margin:-14px 14px 28px;border-radius:18px;box-shadow:0 8px 28px #17335b1a;padding:22px}.section{margin:8px 0 26px}.section h2{font-size:18px;margin:0 0 15px;border-left:5px solid var(--laranja);padding-left:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;background:white}textarea{min-height:95px;resize:vertical}.photo{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--muted)}.radios{display:flex;gap:12px;flex-wrap:wrap}.radios label{font-weight:400;border:1px solid var(--line);padding:9px 11px;border-radius:9px;margin:0}.radios input{width:auto;margin-right:5px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:11px;padding:13px 17px;font-weight:700;cursor:pointer}.primary{background:var(--azul);color:#fff}.secondary{background:#e9eef6;color:var(--txt)}.note{font-size:12px;color:var(--muted);line-height:1.45}.saved{display:none;margin-top:12px;padding:10px;border-radius:9px;background:#e8f5e9;color:#256029;font-weight:700}@media(max-width:620px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.card{padding:17px;margin-left:10px;margin-right:10px}.brand{font-size:25px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="wrap"><div class="brand">su<b>BT</b>o Experience</div><p>Ficha de Perfil do Atleta • 29/08/2026 • AABB Palmas-TO</p></div></header>
+  <main class="wrap"><form class="card" id="perfil">
+    <section class="section"><h2>Identificação do atleta</h2><div class="grid">
+      <div class="full photo"><label for="foto">Foto do atleta</label><input id="foto" name="foto" type="file" accept="image/*"></div>
+      <div class="full"><label for="nome">Nome</label><input id="nome" name="nome" required></div>
+      <div><label for="nascimento">Data de nascimento</label><input id="nascimento" name="nascimento" type="date"></div>
+      <div><label for="idade">Idade</label><input id="idade" name="idade" type="number" min="5" max="99"></div>
+    </div></section>
+
+    <section class="section"><h2>Trajetória esportiva</h2><div class="grid">
+      <div><label for="tempo">Tempo de Beach Tennis</label><input id="tempo" name="tempo" placeholder="Ex.: 2 anos"></div>
+      <div><label for="treinos">Treinos por semana</label><input id="treinos" name="treinos" type="number" min="0" max="14"></div>
+      <div><label for="duracao">Duração média do treino</label><input id="duracao" name="duracao" placeholder="Ex.: 1h30"></div>
+      <div><label for="professores">Professores regulares</label><input id="professores" name="professores"></div>
+      <div class="full"><label>Frequência em torneios</label><div class="radios">
+        <label><input type="radio" name="torneios" value="Não participa">Não participa</label><label><input type="radio" name="torneios" value="Ocasionalmente">Ocasionalmente</label><label><input type="radio" name="torneios" value="Regularmente">Regularmente</label>
+      </div></div>
+      <div><label for="categorias">Categorias</label><input id="categorias" name="categorias" placeholder="Ex.: Sub-12"></div>
+      <div><label for="mao">Mão dominante</label><select id="mao" name="mao"><option value="">Selecione</option><option>Direita</option><option>Esquerda</option></select></div>
+      <div><label for="lado">Lado predominante em quadra</label><select id="lado" name="lado"><option value="">Selecione</option><option>Esquerda</option><option>Direita</option><option>Ambos / não definido</option></select></div>
+      <div><label for="outro">Outro esporte (opcional)</label><input id="outro" name="outro"></div>
+    </div></section>
+
+    <section class="section"><h2>Bloco do treinador</h2><div class="grid">
+      <div class="full"><label for="obs">Observações técnicas</label><textarea id="obs" name="obs"></textarea></div>
+      <div class="full"><label for="prioridades">Aspectos prioritários para desenvolvimento</label><textarea id="prioridades" name="prioridades"></textarea></div>
+      <div class="full"><label for="orientacoes">Orientações para continuidade</label><textarea id="orientacoes" name="orientacoes"></textarea></div>
+      <div class="full"><label for="outras">Outras observações</label><textarea id="outras" name="outras"></textarea></div>
+    </div></section>
+
+    <div class="actions"><button class="btn primary" type="submit">Salvar ficha neste aparelho</button><button class="btn secondary" type="button" id="limpar">Limpar</button></div>
+    <div class="saved" id="saved">Ficha salva neste navegador.</div>
+    <p class="note">Versão inicial para teste. Os dados ficam armazenados somente neste navegador; nenhuma informação é enviada para servidor nesta etapa.</p>
+  </form></main>
+<script>
+const form=document.getElementById('perfil'),saved=document.getElementById('saved');
+const key='subto-perfil-atleta-v1';
+function snapshot(){const o={};new FormData(form).forEach((v,k)=>{if(!(v instanceof File))o[k]=v});return o}
+function restore(){try{const o=JSON.parse(localStorage.getItem(key)||'{}');Object.entries(o).forEach(([k,v])=>{const els=form.elements[k];if(!els)return;if(els instanceof RadioNodeList){[...els].forEach(e=>e.checked=e.value===v)}else els.value=v})}catch(e){}}
+form.addEventListener('submit',e=>{e.preventDefault();localStorage.setItem(key,JSON.stringify(snapshot()));saved.style.display='block';setTimeout(()=>saved.style.display='none',2500)});
+document.getElementById('limpar').onclick=()=>{if(confirm('Limpar os dados desta ficha?')){form.reset();localStorage.removeItem(key)}};
+document.getElementById('nascimento').addEventListener('change',e=>{if(!e.target.value)return;const d=new Date(e.target.value+'T00:00:00'),h=new Date();let a=h.getFullYear()-d.getFullYear();if(h.getMonth()<d.getMonth()||(h.getMonth()===d.getMonth()&&h.getDate()<d.getDate()))a--;document.getElementById('idade').value=a});
+restore();
+</script>
+</body></html>
