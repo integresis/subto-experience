@@ -9,12 +9,32 @@
 </head>
 <body>
 <header><div class="wrap"><div class="brand">su<b>BT</b>o Experience</div><p>Acesso administrativo</p></div></header>
-<div class="wrap"><section class="card"><h1>Entrar no painel</h1><p class="muted">Digite um e-mail previamente autorizado. Se for o primeiro acesso, o usuário de autenticação será criado automaticamente apenas para esse e-mail autorizado.</p><input id="email" type="email" placeholder="seu@email.com" autocomplete="email"><button id="send">Enviar link de acesso</button><div id="msg" class="msg"></div></section></div>
+<div class="wrap"><section class="card"><h1>Entrar no painel</h1><p class="muted">Digite um e-mail previamente autorizado. No primeiro acesso, o sistema prepara esse usuário e envia um link de entrada. Depois, a sessão fica salva neste navegador enquanto permanecer válida.</p><input id="email" type="email" placeholder="seu@email.com" autocomplete="email"><button id="send">Enviar link de acesso</button><div id="msg" class="msg"></div></section></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb=window.supabase.createClient('https://jaclntjjlzoumzkoiqgv.supabase.co','sb_publishable_J7Nega84MpJvAWYP-rA_Vg_nQV1m_0x');
 const email=document.getElementById('email'),msg=document.getElementById('msg'),btn=document.getElementById('send');
-btn.onclick=async()=>{const value=email.value.trim().toLowerCase();msg.textContent='';msg.className='msg';if(!value){msg.textContent='Digite o e-mail.';msg.classList.add('err');return}btn.disabled=true;btn.textContent='Verificando...';const {data:allowed,error:checkError}=await sb.rpc('is_admin_email',{p_email:value});if(checkError||!allowed){msg.textContent='Este e-mail não está autorizado para o painel.';msg.classList.add('err');btn.disabled=false;btn.textContent='Enviar link de acesso';return}btn.textContent='Enviando...';const {error}=await sb.auth.signInWithOtp({email:value,options:{emailRedirectTo:location.origin+'/admin.html',shouldCreateUser:true}});if(error){msg.textContent=error.message;msg.classList.add('err')}else{msg.textContent='Link enviado. Abra o e-mail e toque em Sign in. Depois disso, o acesso ficará salvo neste navegador enquanto a sessão estiver válida.';msg.classList.add('ok')}btn.disabled=false;btn.textContent='Enviar link de acesso'};
+btn.onclick=async()=>{
+  const value=email.value.trim().toLowerCase();
+  msg.textContent='';msg.className='msg';
+  if(!value){msg.textContent='Digite o e-mail.';msg.classList.add('err');return}
+  btn.disabled=true;btn.textContent='Verificando...';
+  try{
+    const {data:allowed,error:checkError}=await sb.rpc('is_admin_email',{p_email:value});
+    if(checkError||!allowed)throw new Error('Este e-mail não está autorizado para o painel.');
+    btn.textContent='Preparando acesso...';
+    const provision=await fetch('https://jaclntjjlzoumzkoiqgv.supabase.co/functions/v1/ensure-admin-user',{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_J7Nega84MpJvAWYP-rA_Vg_nQV1m_0x'},body:JSON.stringify({email:value})
+    });
+    const provisionBody=await provision.json().catch(()=>({}));
+    if(!provision.ok)throw new Error(provisionBody?.error==='not_authorized'?'Este e-mail não está autorizado para o painel.':'Não foi possível preparar o acesso.');
+    btn.textContent='Enviando...';
+    const {error}=await sb.auth.signInWithOtp({email:value,options:{emailRedirectTo:location.origin+'/admin.html',shouldCreateUser:false}});
+    if(error)throw error;
+    msg.textContent='Link enviado. Abra o e-mail e toque em Sign in. Depois disso, o acesso ficará salvo neste navegador enquanto a sessão estiver válida.';msg.classList.add('ok');
+  }catch(err){msg.textContent=err?.message||'Não foi possível enviar o acesso.';msg.classList.add('err')}
+  finally{btn.disabled=false;btn.textContent='Enviar link de acesso'}
+};
 </script>
 </body>
 </html>
