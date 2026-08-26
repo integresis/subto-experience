@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>suBTo Experience — Ficha do Atleta</title>
+<style>
+:root{--navy:#082657;--orange:#f28a00;--ink:#1f2f49;--muted:#6b7587;--line:#d8dee8}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#eef2f6}.page{width:min(210mm,100%);min-height:297mm;margin:18px auto;background:#fff;padding:14mm;box-shadow:0 12px 35px #0002}.head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;border-bottom:3px solid var(--navy);padding-bottom:8mm;margin-bottom:8mm}.brand{font-size:28px;font-weight:900;color:var(--navy)}.brand b{color:var(--orange)}.meta{font-size:12px;color:var(--muted);text-align:right}.profile{display:flex;gap:8mm;align-items:center;margin-bottom:8mm}.profile img{width:34mm;height:34mm;border-radius:50%;object-fit:cover;border:1px solid var(--line)}h1{font-size:24px;margin:0;color:var(--navy)}h2{font-size:15px;margin:8mm 0 3mm;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:2mm}.grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm 6mm}.item{font-size:12px;line-height:1.45}.item strong{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}.wide{grid-column:1/-1}.question{border:1px solid var(--line);border-radius:8px;padding:4mm;margin-top:3mm;font-size:12px;line-height:1.5;white-space:pre-wrap}.toolbar{width:min(210mm,100%);margin:14px auto 0;display:flex;gap:8px;justify-content:flex-end}.btn{border:0;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer}.primary{background:var(--orange);color:#fff}.secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}.error{width:min(720px,92vw);margin:60px auto;background:#fff;border:1px solid #f1c7c7;color:#8b1e1e;border-radius:14px;padding:20px}.loading{padding:40px;text-align:center;color:var(--muted)}
+@media(max-width:700px){.page{margin:0;min-height:100vh;padding:20px;box-shadow:none}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.head{flex-direction:column}.meta{text-align:left}.toolbar{padding:0 12px 12px}.profile{align-items:flex-start}.profile img{width:92px;height:92px}}
+@media print{@page{size:A4;margin:0}body{background:#fff}.toolbar,.error,.loading{display:none!important}.page{width:210mm;min-height:297mm;margin:0;padding:12mm;box-shadow:none}.profile img{width:32mm;height:32mm}}
+</style>
+</head>
+<body>
+<div class="toolbar"><button class="btn secondary" onclick="history.back()">Voltar</button><button id="printBtn" class="btn primary" disabled>Imprimir</button></div>
+<div id="loading" class="loading">Carregando ficha...</div>
+<div id="error" class="error" hidden></div>
+<main id="page" class="page" hidden></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb=window.supabase.createClient('https://jaclntjjlzoumzkoiqgv.supabase.co','sb_publishable_J7Nega84MpJvAWYP-rA_Vg_nQV1m_0x');
+const id=new URLSearchParams(location.search).get('id');
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const digits=v=>String(v||'').replace(/\D/g,'');
+function phone(v){const d=digits(v).slice(0,11);if(!d)return'—';if(d.length<11)return d;return`(${d.slice(0,2)}) ${d.slice(2,3)} ${d.slice(3,7)}-${d.slice(7)}`}
+function br(v){if(!v)return'—';const p=String(v).split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:v}
+function arena(r){return r.club_name==='Outro'?(r.club_other||'Outro'):(r.club_name||'—')}
+function item(label,value,wide=false){return`<div class="item${wide?' wide':''}"><strong>${esc(label)}</strong>${esc(value||'—')}</div>`}
+function fail(msg){document.getElementById('loading').hidden=true;const e=document.getElementById('error');e.hidden=false;e.textContent=msg}
+async function signedPhoto(path){if(!path)return'';const {data}=await sb.storage.from('athlete-photos').createSignedUrl(path,3600);return data?.signedUrl||''}
+async function init(){if(!id)return fail('Ficha não identificada. Volte ao painel e abra novamente a impressão.');const {data:{session}}=await sb.auth.getSession();if(!session)return fail('Sua sessão administrativa não está ativa. Entre novamente pelo painel.');const {data:isAdmin,error:adminError}=await sb.rpc('is_admin');if(adminError||!isAdmin)return fail('Este usuário não está autorizado a visualizar fichas administrativas.');const {data:r,error}=await sb.from('athlete_submissions').select('*').eq('id',id).single();if(error||!r)return fail('Não foi possível carregar esta ficha. Nenhum dado foi alterado.');const photo=await signedPhoto(r.photo_path);const page=document.getElementById('page');page.innerHTML=`<div class="head"><div><div class="brand">su<b>BT</b>o Experience</div><div>Ficha individual do atleta</div></div><div class="meta">29/08/2026 · AABB Palmas<br>Gerada em ${new Date().toLocaleString('pt-BR')}</div></div><div class="profile">${photo?`<img src="${photo}" alt="Foto do atleta">`:''}<div><h1>${esc(r.athlete_name)}</h1><div>${esc(r.category)} · ${esc(arena(r))}</div></div></div><h2>Identificação</h2><div class="grid">${item('Data de nascimento',br(r.birth_date))}${item('Categoria',r.category)}${item('Arena/Clube',arena(r))}${item('Status',r.status)}</div><h2>Histórico esportivo</h2><div class="grid">${item('Tempo de Beach Tennis',r.beach_tennis_time)}${item('Treinos por semana',r.trainings_per_week)}${item('Duração média',r.training_duration)}${item('Professores regulares',r.regular_coaches)}${item('Participa de torneios',r.tournaments)}${item('Mão dominante',r.dominant_hand)}${item('Lado predominante',r.court_side)}${item('Outro esporte',r.other_sport?(r.other_sport_name||'Sim'):'Não')}</div><h2>Responsável</h2><div class="grid">${item('Nome',r.guardian_name)}${item('WhatsApp',phone(r.guardian_whatsapp))}${item('E-mail',r.guardian_email,true)}</div><h2>Perguntas e observações</h2><div class="question"><strong>Principal dúvida sobre o desenvolvimento do atleta</strong><br>${esc(r.question_one||'—')}</div><div class="question"><strong>Segunda dúvida para o treinador</strong><br>${esc(r.question_two||'—')}</div><div class="question"><strong>Observação da família</strong><br>${esc(r.family_note||'—')}</div>`;document.getElementById('loading').hidden=true;page.hidden=false;document.getElementById('printBtn').disabled=false}
+document.getElementById('printBtn').onclick=()=>window.print();init();
+</script>
+</body>
+</html>
