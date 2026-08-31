@@ -59,6 +59,58 @@ O RaquetesTO não é marketplace e não participa da transação.
 ## Vitrine e busca
 Filtros simples por modalidade, marca, peso, balance, espessura, material, preço, cidade e condição.
 
+### Ordenação da vitrine
+- Padrão: anúncios mais novos primeiro
+- Alternativas: menor preço e maior preço
+- Anúncios vendidos ou indisponíveis deixam de aparecer na vitrine principal
+
+### Cards
+- Todos os cards com mesma altura e proporção visual
+- Foto principal com enquadramento padronizado
+- Marca e modelo em posição fixa
+- Preço em destaque
+- Peso e cidade como informação rápida
+- Selo discreto para Nova/Usada e Venda/Troca
+- Ações não devem deslocar ou alterar o tamanho do card
+- Layout mobile-first, com leitura rápida e sem excesso de texto
+
+## Favoritos
+Usuário identificado pode favoritar anúncios.
+- Favoritos ficam disponíveis em uma tela própria
+- Favoritar não cria compromisso, reserva ou contato automático
+- Um anúncio indisponível pode permanecer no histórico de favoritos, identificado como indisponível
+
+## Comparação
+Permitir selecionar até 3 raquetes para comparação lado a lado.
+
+Campos prioritários da comparação:
+- foto
+- marca/modelo
+- preço
+- estado
+- peso
+- balance
+- espessura
+- material da face
+- cidade
+
+No celular, a comparação deve priorizar leitura simples e rolagem horizontal ou apresentação em tabela adaptada, sem tentar exibir informações demais de uma vez.
+
+## Página do anúncio
+Ao tocar em um card, abrir uma página de detalhe com:
+- galeria de fotos
+- marca/modelo
+- preço
+- características técnicas
+- estado e tipo de negociação
+- cidade
+- descrição
+- botão principal “Chamar no WhatsApp”
+- favoritar
+- adicionar à comparação
+- denunciar anúncio
+- seção de raquetes similares
+
 ## Similaridade
 Ao abrir um anúncio, apresentar raquetes similares considerando, progressivamente:
 1. mesma modalidade
@@ -72,8 +124,15 @@ Ao abrir um anúncio, apresentar raquetes similares considerando, progressivamen
 
 Entre resultados suficientemente similares, favorecer ordenação por preço e explicar de forma simples por que são parecidos.
 
+### Comportamento dos similares
+- A seção aparece abaixo do anúncio atual
+- Cards seguem exatamente o mesmo padrão visual da vitrine
+- Ao tocar em uma raquete similar, ela se torna a página principal e seus próprios similares são recalculados
+- Evitar repetição excessiva do anúncio atual na sequência
+- Preferir anúncios ativos
+
 ## Fluxo da negociação
-Encontrou → abriu o anúncio → comparou → chamou no WhatsApp.
+Encontrou → abriu o anúncio → comparou/favoritou → chamou no WhatsApp.
 
 Não haverá no MVP:
 - pagamento interno
@@ -87,6 +146,18 @@ Não haverá no MVP:
 
 ## Controle do anúncio
 O proprietário pode editar, marcar como vendido/indisponível ou excluir o próprio anúncio. Deve existir opção para denunciar anúncio.
+
+## Boas práticas de produto travadas
+- experiência conhecida de classificados/marketplaces, sem reinventar navegação
+- novidades primeiro por padrão
+- cards uniformes
+- favoritos
+- comparação de até 3 itens
+- similares na página do produto
+- filtros objetivos
+- poucas ações principais por tela
+- WhatsApp como destino da negociação
+- nenhuma função que transforme a plataforma em intermediadora financeira ou logística
 
 ## Princípio do produto
 Resolver o problema de anúncios de raquetes que se perdem nos grupos de WhatsApp sem assumir responsabilidades de marketplace.
