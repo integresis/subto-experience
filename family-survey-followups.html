@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>suBTo — Acompanhamentos da pesquisa</title>
+<style>
+:root{--n:#082657;--o:#f28a00;--bg:#f5f7fa;--line:#dce4ee;--muted:#68758a;--green:#177245;--amber:#8a5b12;--blue:#245b91;--gray:#596579}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:#20314b}header{background:linear-gradient(135deg,var(--n),#104488);color:#fff;padding:20px 15px}.wrap{max-width:980px;margin:auto}.brand{font-size:25px;font-weight:900}.brand b{color:var(--o)}main{padding:16px 12px 45px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}h2{margin:0 0 12px;color:var(--n);font-size:19px}.filters{display:grid;grid-template-columns:2fr 1fr;gap:10px}.filters label{font-size:12px;font-weight:800;color:var(--muted)}select{width:100%;padding:11px;margin-top:5px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:#fff}.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.stat{background:#f7f9fc;border-radius:12px;padding:10px 12px;min-width:120px}.stat b{display:block;font-size:21px;color:var(--n)}.item{border-top:1px solid var(--line);padding:14px 0}.item:first-child{border-top:0}.item-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.athlete{font-weight:900;color:var(--n)}.event{font-size:12px;color:var(--muted);margin-top:2px}.question{font-weight:800;margin-top:9px}.answer{white-space:pre-wrap;line-height:1.45;margin-top:5px}.badge{display:inline-block;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.pending{background:#fff4df;color:#855200}.talked{background:#eaf3fb;color:var(--blue)}.understood{background:#eaf7ef;color:var(--green)}.closed{background:#eef1f4;color:var(--gray)}.muted{color:var(--muted);font-size:12px}.empty{text-align:center;padding:28px 10px;color:var(--muted)}.back{display:inline-block;margin-top:8px;color:#fff;font-size:12px;text-decoration:none;font-weight:800;opacity:.9}@media(max-width:680px){.filters{grid-template-columns:1fr}.item-top{display:block}.badge{margin-top:8px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">su<b>BT</b>o Experience</div><div>Acompanhamentos da pesquisa</div><a class="back" href="./modules.html">← Voltar aos módulos</a></div></header>
+<main class="wrap">
+  <section class="card">
+    <div class="filters">
+      <label>Evento<select id="eventFilter"><option value="">Todos os eventos</option></select></label>
+      <label>Status<select id="statusFilter"><option value="">Todos os status</option><option value="pending">Pendente</option><option value="talked">Conversado</option><option value="understood">Entendido</option><option value="closed">Encerrado</option></select></label>
+    </div>
+    <div id="stats" class="stats"></div>
+  </section>
+  <section class="card"><h2>Itens em acompanhamento</h2><div id="list" class="muted">Carregando...</div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb=supabase.createClient('https://jaclntjjlzoumzkoiqgv.supabase.co','sb_publishable_J7Nega84MpJvAWYP-rA_Vg_nQV1m_0x');
+const $=id=>document.getElementById(id),eventFilter=$('eventFilter'),statusFilter=$('statusFilter'),stats=$('stats'),list=$('list');
+let rows=[],events=[];
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function answerText(v){if(v==null||v==='')return '—';if(Array.isArray(v))return v.join(', ');if(typeof v==='object')return Object.entries(v).map(([k,x])=>`${k}: ${x}`).join('\n');return String(v)}
+function statusLabel(s){return ({pending:'Pendente',talked:'Conversado',understood:'Entendido',closed:'Encerrado'})[s]||s||'Pendente'}
+function render(){const eid=eventFilter.value,status=statusFilter.value;const filtered=rows.filter(x=>(!eid||x.event_id===eid)&&(!status||x.status===status));const counts={pending:0,talked:0,understood:0,closed:0};filtered.forEach(x=>counts[x.status]=(counts[x.status]||0)+1);stats.innerHTML=`<div class="stat"><b>${filtered.length}</b><span>itens</span></div><div class="stat"><b>${counts.pending||0}</b><span>pendentes</span></div><div class="stat"><b>${counts.talked||0}</b><span>conversados</span></div><div class="stat"><b>${counts.understood||0}</b><span>entendidos</span></div><div class="stat"><b>${counts.closed||0}</b><span>encerrados</span></div>`;list.innerHTML=filtered.length?filtered.map(x=>`<div class="item"><div class="item-top"><div><div class="athlete">${esc(x.athlete_name||'Atleta')}</div><div class="event">${esc(x.event_name||'Evento')}</div></div><span class="badge ${esc(x.status||'pending')}">${esc(statusLabel(x.status))}</span></div><div class="question">${esc(x.question_label)}</div><div class="answer">${esc(answerText(x.answer_snapshot))}</div><div class="muted" style="margin-top:8px">Marcado em ${esc(new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(x.created_at)))}</div></div>`).join(''):`<div class="empty">Nenhum item encontrado para estes filtros.</div>`}
+async function load(){const [e,f]=await Promise.all([sb.from('events').select('id,name,start_date').order('start_date',{ascending:false}),sb.from('event_survey_followups').select('id,event_id,invitation_id,question_id,athlete_name,question_label,answer_snapshot,status,created_at,updated_at').order('created_at',{ascending:false})]);if(e.error||f.error)return alert((e.error||f.error).message);events=e.data||[];const eventMap=new Map(events.map(x=>[x.id,x.name]));rows=(f.data||[]).map(x=>({...x,event_name:eventMap.get(x.event_id)||'Evento'}));eventFilter.innerHTML='<option value="">Todos os eventos</option>'+events.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}${x.start_date?' · '+esc(x.start_date):''}</option>`).join('');render()}
+[eventFilter,statusFilter].forEach(x=>x.onchange=render);
+async function init(){const {data:{session}}=await sb.auth.getSession();if(!session)return location.replace('./login.html');const {data:ok,error}=await sb.rpc('is_admin');if(error||!ok)return location.replace('./login.html');await load()}
+init();
+</script>
+</body>
+</html>
